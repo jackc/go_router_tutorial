@@ -8,4 +8,4 @@ This is a tutorial project for creating a router in Go. It will route based on q
 
 # s2 - Implement 404 for everything
 
-
+# s3 - Failing test for basic string matching

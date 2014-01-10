@@ -1,6 +1,7 @@
 package router
 
 import (
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -8,6 +9,11 @@ import (
 
 func TestRouter(t *testing.T) {
 	router := NewRouter()
+
+	widgetIndexHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		io.WriteString(w, "widgetIndex")
+	})
+	router.AddRoute("GET", "/widgets", widgetIndexHandler)
 
 	testRequest := func(method string, path string, expectedCode int, expectedBody string) {
 		response := httptest.NewRecorder()
@@ -25,5 +31,6 @@ func TestRouter(t *testing.T) {
 		}
 	}
 
+	testRequest("GET", "/widgets", 200, "widgetIndex")
 	testRequest("GET", "/missing", 404, "404 Not Found")
 }
