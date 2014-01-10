@@ -5,3 +5,7 @@ This is a tutorial project for creating a router in Go. It will route based on q
 # s1 - Failing test for not found
 
 * httptest.ResponseRecorder
+
+# s2 - Implement 404 for everything
+
+
