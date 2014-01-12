@@ -11,3 +11,8 @@ This is a tutorial project for creating a router in Go. It will route based on q
 # s3 - Failing test for basic string matching
 
 # s4 - Implement basic string matching
+
+# s5 - Refactor tests
+
+* Extract stubHandler is straightforeward
+* Extract testRequest is more nuanced. The inline version had the advantage of not having to pass in the *Router and *testing.T due to it being a closure. The extracted version has the advantage of the test body being cleaner and it being usable in multiple tests.
