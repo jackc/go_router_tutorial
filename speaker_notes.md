@@ -33,3 +33,21 @@ Unfortunately, this is a big step. Fundamental change is breaking URLs into segm
 * findEndpoint traverses the routing tree recursively
 
 At this point we are routing to the correct endpoint, but we are not giving it the parameters.
+
+# s8 - Implement parameter capturing
+
+Unfortunately, Go does not make it easy to attach context to an http.Request and pass it to the next handler.
+
+Possible approaches:
+
+* Global map indexed by request - must make currency safe (gorilla/mux)
+* Break compatibility with http.Handler by adding arguments to handler signature
+* Rewrite URL query string
+
+Rewrite URL query string
+
+* endpoint is new structure that stores handler and ordered names of parameters
+* Use endpoint instead of http.Handler throughout router
+* AddRoute now extracts parameter names
+* findEndpoint now records the values of the parameter segments it matches
+* addRouteArgumentsToRequest takes the parameter names from the endpoint and the parameter values from findEndpoint and rewrites the query string to include them

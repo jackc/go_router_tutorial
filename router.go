@@ -6,8 +6,13 @@ import (
 	"strings"
 )
 
+type endpoint struct {
+	handler    http.Handler
+	parameters []string
+}
+
 type Router struct {
-	endpoint        http.Handler
+	endpoint        *endpoint
 	staticBranches  map[string]*Router
 	parameterBranch *Router
 }
@@ -15,8 +20,9 @@ type Router struct {
 // ServeHTTP makes Router implement standard http.Handler
 func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	segments := segmentizePath(req.URL.Path)
-	if endpoint, ok := r.findEndpoint(segments); ok {
-		endpoint.ServeHTTP(w, req)
+	if endpoint, arguments, ok := r.findEndpoint(segments, []string{}); ok {
+		addRouteArgumentsToRequest(endpoint.parameters, arguments, req)
+		endpoint.handler.ServeHTTP(w, req)
 	} else {
 		w.WriteHeader(404)
 		io.WriteString(w, "404 Not Found")
@@ -25,7 +31,8 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 func (r *Router) AddRoute(method string, path string, handler http.Handler) {
 	segments := segmentizePath(path)
-	endpoint := handler
+	parameters := extractParameterNames(segments)
+	endpoint := &endpoint{handler: handler, parameters: parameters}
 	r.addRouteFromSegments(method, segments, endpoint)
 }
 
@@ -35,7 +42,7 @@ func NewRouter() (r *Router) {
 	return r
 }
 
-func (r *Router) addRouteFromSegments(method string, segments []string, endpoint http.Handler) {
+func (r *Router) addRouteFromSegments(method string, segments []string, endpoint *endpoint) {
 	if len(segments) > 0 {
 		head, tail := segments[0], segments[1:]
 
@@ -67,16 +74,34 @@ func segmentizePath(path string) (segments []string) {
 	return
 }
 
-func (r *Router) findEndpoint(segments []string) (http.Handler, bool) {
+func (r *Router) findEndpoint(segments []string, pathArguments []string) (*endpoint, []string, bool) {
 	if len(segments) > 0 {
 		head, tail := segments[0], segments[1:]
 		if subrouter, present := r.staticBranches[head]; present {
-			return subrouter.findEndpoint(tail)
+			return subrouter.findEndpoint(tail, pathArguments)
 		} else if r.parameterBranch != nil {
-			return r.parameterBranch.findEndpoint(tail)
+			pathArguments = append(pathArguments, head)
+			return r.parameterBranch.findEndpoint(tail, pathArguments)
 		} else {
-			return nil, false
+			return nil, nil, false
 		}
 	}
-	return r.endpoint, true
+	return r.endpoint, pathArguments, true
+}
+
+func addRouteArgumentsToRequest(names, values []string, req *http.Request) {
+	query := req.URL.Query()
+	for i := 0; i < len(names); i++ {
+		query.Set(names[i], values[i])
+	}
+	req.URL.RawQuery = query.Encode()
+}
+
+func extractParameterNames(segments []string) (parameters []string) {
+	for _, s := range segments {
+		if strings.HasPrefix(s, ":") {
+			parameters = append(parameters, s[1:])
+		}
+	}
+	return
 }
