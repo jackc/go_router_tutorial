@@ -16,3 +16,7 @@ This is a tutorial project for creating a router in Go. It will route based on q
 
 * Extract stubHandler is straightforeward
 * Extract testRequest is more nuanced. The inline version had the advantage of not having to pass in the *Router and *testing.T due to it being a closure. The extracted version has the advantage of the test body being cleaner and it being usable in multiple tests.
+
+# s6 - Failing test for parameter matching
+
+* Updated stub handler to print query parameters
