@@ -51,3 +51,90 @@ func TestRouter(t *testing.T) {
 	testRequest(t, r, "DELETE", "/widgets/1", 200, "widgetDelete id: 1")
 	testRequest(t, r, "GET", "/missing", 404, "404 Not Found")
 }
+
+var benchmarkRouter *Router
+
+func getBenchmarkRouter() *Router {
+	if benchmarkRouter != nil {
+		return benchmarkRouter
+	}
+
+	benchmarkRouter := NewRouter()
+	handler := http.HandlerFunc(func(http.ResponseWriter, *http.Request) {})
+	benchmarkRouter.AddRoute("GET", "/", handler)
+	benchmarkRouter.AddRoute("GET", "/foo", handler)
+	benchmarkRouter.AddRoute("GET", "/foo/bar", handler)
+	benchmarkRouter.AddRoute("GET", "/foo/baz", handler)
+	benchmarkRouter.AddRoute("GET", "/foo/bar/baz/quz", handler)
+	benchmarkRouter.AddRoute("GET", "/people", handler)
+	benchmarkRouter.AddRoute("GET", "/people/search", handler)
+	benchmarkRouter.AddRoute("GET", "/people/:id", handler)
+	benchmarkRouter.AddRoute("GET", "/users", handler)
+	benchmarkRouter.AddRoute("GET", "/users/:id", handler)
+	benchmarkRouter.AddRoute("GET", "/widgets", handler)
+	benchmarkRouter.AddRoute("GET", "/widgets/important", handler)
+
+	return benchmarkRouter
+}
+
+func getBench(b *testing.B, handler http.Handler, path string, expectedCode int) {
+	response := httptest.NewRecorder()
+	request, err := http.NewRequest("GET", "http://example.com"+path, nil)
+	if err != nil {
+		b.Fatalf("Unable to create test GET request for %v", path)
+	}
+
+	handler.ServeHTTP(response, request)
+	if response.Code != expectedCode {
+		b.Fatalf("GET %v: expected HTTP code %v, received %v", path, expectedCode, response.Code)
+	}
+}
+
+func BenchmarkRoutedRequest(b *testing.B) {
+	router := getBenchmarkRouter()
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		getBench(b, router, "/widgets/important", 200)
+	}
+}
+
+func BenchmarkFindEndpointRoot(b *testing.B) {
+	router := getBenchmarkRouter()
+
+	for i := 0; i < b.N; i++ {
+		router.findEndpoint("GET", segmentizePath("/"), []string{})
+	}
+}
+
+func BenchmarkFindEndpointSegment1(b *testing.B) {
+	router := getBenchmarkRouter()
+
+	for i := 0; i < b.N; i++ {
+		router.findEndpoint("GET", segmentizePath("/foo"), []string{})
+	}
+}
+
+func BenchmarkFindEndpointSegment2(b *testing.B) {
+	router := getBenchmarkRouter()
+
+	for i := 0; i < b.N; i++ {
+		router.findEndpoint("GET", segmentizePath("/people/search"), []string{})
+	}
+}
+
+func BenchmarkFindEndpointSegment2Placeholder(b *testing.B) {
+	router := getBenchmarkRouter()
+
+	for i := 0; i < b.N; i++ {
+		router.findEndpoint("GET", segmentizePath("/people/1"), []string{})
+	}
+}
+
+func BenchmarkFindEndpointSegment4(b *testing.B) {
+	router := getBenchmarkRouter()
+
+	for i := 0; i < b.N; i++ {
+		router.findEndpoint("GET", segmentizePath("/foo/bar/baz/quz"), []string{})
+	}
+}
