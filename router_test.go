@@ -36,12 +36,18 @@ func testRequest(t *testing.T, router *Router, method string, path string, expec
 func TestRouter(t *testing.T) {
 	r := NewRouter()
 	r.AddRoute("GET", "/widgets", stubHandler("widgetIndex"))
+	r.AddRoute("POST", "/widgets", stubHandler("widgetCreate"))
 	r.AddRoute("GET", "/widgets/:id", stubHandler("widgetShow"))
 	r.AddRoute("GET", "/widgets/:id/edit", stubHandler("widgetEdit"))
+	r.AddRoute("PUT", "/widgets/:id", stubHandler("widgetUpdate"))
+	r.AddRoute("DELETE", "/widgets/:id", stubHandler("widgetDelete"))
 
 	testRequest(t, r, "GET", "/widgets", 200, "widgetIndex")
+	testRequest(t, r, "POST", "/widgets", 200, "widgetCreate")
 	testRequest(t, r, "GET", "/widgets/1", 200, "widgetShow id: 1")
 	testRequest(t, r, "GET", "/widgets/2", 200, "widgetShow id: 2")
 	testRequest(t, r, "GET", "/widgets/1/edit", 200, "widgetEdit id: 1")
+	testRequest(t, r, "PUT", "/widgets/1", 200, "widgetUpdate id: 1")
+	testRequest(t, r, "DELETE", "/widgets/1", 200, "widgetDelete id: 1")
 	testRequest(t, r, "GET", "/missing", 404, "404 Not Found")
 }

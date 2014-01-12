@@ -51,3 +51,5 @@ Rewrite URL query string
 * AddRoute now extracts parameter names
 * findEndpoint now records the values of the parameter segments it matches
 * addRouteArgumentsToRequest takes the parameter names from the endpoint and the parameter values from findEndpoint and rewrites the query string to include them
+
+# s9 - Failing method matching test
