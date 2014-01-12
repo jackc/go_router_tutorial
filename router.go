@@ -1,4 +1,4 @@
-package router
+package go_router_tutorial
 
 import (
 	"io"

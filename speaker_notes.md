@@ -59,3 +59,8 @@ Rewrite URL query string
 * Add map for method to endpoint
 
 # s11 - Add convenience methods
+
+# s12 - Demo app
+
+* Fix - Use same package name as directory name so Go can import package
+
