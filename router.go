@@ -12,7 +12,7 @@ type endpoint struct {
 }
 
 type Router struct {
-	endpoint        *endpoint
+	methodEndpoints map[string]*endpoint
 	staticBranches  map[string]*Router
 	parameterBranch *Router
 }
@@ -20,7 +20,7 @@ type Router struct {
 // ServeHTTP makes Router implement standard http.Handler
 func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	segments := segmentizePath(req.URL.Path)
-	if endpoint, arguments, ok := r.findEndpoint(segments, []string{}); ok {
+	if endpoint, arguments, ok := r.findEndpoint(req.Method, segments, []string{}); ok {
 		addRouteArgumentsToRequest(endpoint.parameters, arguments, req)
 		endpoint.handler.ServeHTTP(w, req)
 	} else {
@@ -38,6 +38,7 @@ func (r *Router) AddRoute(method string, path string, handler http.Handler) {
 
 func NewRouter() (r *Router) {
 	r = new(Router)
+	r.methodEndpoints = make(map[string]*endpoint)
 	r.staticBranches = make(map[string]*Router)
 	return r
 }
@@ -61,7 +62,7 @@ func (r *Router) addRouteFromSegments(method string, segments []string, endpoint
 
 		subrouter.addRouteFromSegments(method, tail, endpoint)
 	} else {
-		r.endpoint = endpoint
+		r.methodEndpoints[method] = endpoint
 	}
 }
 
@@ -74,19 +75,20 @@ func segmentizePath(path string) (segments []string) {
 	return
 }
 
-func (r *Router) findEndpoint(segments []string, pathArguments []string) (*endpoint, []string, bool) {
+func (r *Router) findEndpoint(method string, segments []string, pathArguments []string) (*endpoint, []string, bool) {
 	if len(segments) > 0 {
 		head, tail := segments[0], segments[1:]
 		if subrouter, present := r.staticBranches[head]; present {
-			return subrouter.findEndpoint(tail, pathArguments)
+			return subrouter.findEndpoint(method, tail, pathArguments)
 		} else if r.parameterBranch != nil {
 			pathArguments = append(pathArguments, head)
-			return r.parameterBranch.findEndpoint(tail, pathArguments)
+			return r.parameterBranch.findEndpoint(method, tail, pathArguments)
 		} else {
 			return nil, nil, false
 		}
 	}
-	return r.endpoint, pathArguments, true
+	endpoint, present := r.methodEndpoints[method]
+	return endpoint, pathArguments, present
 }
 
 func addRouteArgumentsToRequest(names, values []string, req *http.Request) {

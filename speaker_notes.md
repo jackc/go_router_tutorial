@@ -53,3 +53,7 @@ Rewrite URL query string
 * addRouteArgumentsToRequest takes the parameter names from the endpoint and the parameter values from findEndpoint and rewrites the query string to include them
 
 # s9 - Failing method matching test
+
+# s10 - Implement method matching
+
+* Add map for method to endpoint
