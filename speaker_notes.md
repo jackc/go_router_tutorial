@@ -20,3 +20,16 @@ This is a tutorial project for creating a router in Go. It will route based on q
 # s6 - Failing test for parameter matching
 
 * Updated stub handler to print query parameters
+
+# s7 - Implement parameter matching
+
+Unfortunately, this is a big step. Fundamental change is breaking URLs into segments and the router being defined as a tree.
+
+* Router is defined recursively. Each router is responsible for one segment.
+* AddRoute now uses segmentizePath then addRouteFromSegments (which does most of the work) to construct routes
+* segmentizePath splits strings by '/' and removes any empty segments causes by a '/' being the first or last character
+* addRouteFromSegments recursively calls itself, creating new routers along the way as needed
+* ServeHTTP now uses segmentizePath and findEndpoint to traverse the tree and find the correct endpoint
+* findEndpoint traverses the routing tree recursively
+
+At this point we are routing to the correct endpoint, but we are not giving it the parameters.
