@@ -29,6 +29,22 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+func (r *Router) Get(path string, handler http.Handler) {
+	r.AddRoute("GET", path, handler)
+}
+
+func (r *Router) Post(path string, handler http.Handler) {
+	r.AddRoute("POST", path, handler)
+}
+
+func (r *Router) Put(path string, handler http.Handler) {
+	r.AddRoute("PUT", path, handler)
+}
+
+func (r *Router) Delete(path string, handler http.Handler) {
+	r.AddRoute("DELETE", path, handler)
+}
+
 func (r *Router) AddRoute(method string, path string, handler http.Handler) {
 	segments := segmentizePath(path)
 	parameters := extractParameterNames(segments)

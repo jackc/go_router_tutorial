@@ -57,3 +57,5 @@ Rewrite URL query string
 # s10 - Implement method matching
 
 * Add map for method to endpoint
+
+# s11 - Add convenience methods
