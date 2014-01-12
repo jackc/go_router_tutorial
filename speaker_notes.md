@@ -60,8 +60,14 @@ Rewrite URL query string
 
 # s11 - Add convenience methods
 
+* go test -cover # 100% :)
+
 # s12 - Demo app
 
 * Fix - Use same package name as directory name so Go can import package
 
 # s13 - Benchmarks
+
+# Final thoughts
+
+Very simple, very fast. We rebuilt https://github.com/JackC/quo_vadis which I am using on multiple projects. See https://github.com/JackC/tpr for example.
