@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/JackC/go_router_tutorial"
+	"github.com/jackc/go_router_tutorial"
 	"net/http"
 	"os"
 )

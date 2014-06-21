@@ -70,4 +70,4 @@ Rewrite URL query string
 
 # Final thoughts
 
-Very simple, very fast. We rebuilt https://github.com/JackC/quo_vadis which I am using on multiple projects. See https://github.com/JackC/tpr for example.
+Very simple, very fast. We rebuilt https://github.com/jackc/quo_vadis which I am using on multiple projects. See https://github.com/jackc/tpr for example.
